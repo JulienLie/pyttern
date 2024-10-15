@@ -1,0 +1,5 @@
+def ?(?*):
+    ?acc = 0
+    ?[For, While]:
+        ?acc += ?
+    return ?<?acc>

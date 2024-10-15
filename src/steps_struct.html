@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>HTML Frames</title>
+<style>
+        .nav-link {
+            color: green;
+        }
+
+        .nav-item{
+           margin: 7px 0;
+        }
+
+        .navbar-nav{
+       list-style-type: none;
+        }
+
+        .nav-item>a:hover {
+            color: red;
+        }
+
+        /*static to change background color*/
+        .navbar-nav>.active>a {
+            background-color: #C0C0C0;
+            color: green;
+        }
+
+pre {
+  display: block;
+  font-family: monospace;
+  white-space: pre;
+  margin: 0.3em 0;
+}
+   p {text-align: center;}
+   vc{
+       color: red;
+       font-weight:bold;   }
+   kc{
+       color: #D75E0E;
+   }
+   dc{
+       color: red;
+   }
+   cm{
+       color: #0ED7AF;
+   }
+</style>
+   </head>
+   <body onload = "activeLink('act');">
+    <script src= "https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"> </script>
+    <script src=  "https://npmcdn.com/tether@1.2.4/dist/js/tether.min.js"> </script>
+    <script src= "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"> </script>
+    <script>
+            $(document).ready(function () {
+                $('ul.navbar-nav > li')
+                        .click(function (e) {
+                    $('ul.navbar-nav > li')
+                        .removeClass('active');
+                    $(this).addClass('active');
+                });
+            });
+     </script>
+    <script type="text/JavaScript">
+           function activeLink(link){
+               if(document.getElementById)
+                   document.getElementById(link).click();
+               else if (document.all)
+                   document.all(link).focus();
+            }
+     </script>
+    <p>List patterns </p>
+    <ul>
+        <!-- steps -->
+    </ul>
+   </body>
+</html>

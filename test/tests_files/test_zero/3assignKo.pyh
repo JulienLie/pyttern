@@ -1,0 +1,5 @@
+def ?(?*):
+    ?[Assign]
+    ?:
+        ?[Assign]{0}
+        ?[AugAssign]{0}

@@ -1,0 +1,5 @@
+def ?(?):
+    ?count = ?
+    for ? in range(?*):
+        ?count = ?count + ?
+    return ?count

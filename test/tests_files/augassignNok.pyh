@@ -1,0 +1,6 @@
+def approx_pi(n):
+    ?pi = 0
+    for i in range(0, n+1):
+        ?pi += ((-1)**i)/(2*i)
+    ?pi *= 4
+    return ?pi

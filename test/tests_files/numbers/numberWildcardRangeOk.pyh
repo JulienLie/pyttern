@@ -1,0 +1,4 @@
+def ? (?*):
+    ?[Assign]
+    ?[While, For]:*
+        ?[Assign]{1,5}

@@ -1,0 +1,9 @@
+antlr4-python3-runtime==4.7.2
+cachelib==0.13.0
+Flask==3.0.3
+Flask-Session==0.8.0
+loguru==0.7.2
+pylint==3.2.2
+pymemcache==4.0.0
+pytest==8.2.2
+tqdm==4.66.5

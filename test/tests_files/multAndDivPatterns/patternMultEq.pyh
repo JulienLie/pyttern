@@ -1,0 +1,4 @@
+def approx_pi(n):
+    ?pi = 0
+    ?:
+        ?pi = ?pi + 4 * ?
