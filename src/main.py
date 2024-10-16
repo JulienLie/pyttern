@@ -1,6 +1,5 @@
 import argparse
 import io
-import tkinter as tk
 from functools import cache
 
 from antlr4 import FileStream, CommonTokenStream, InputStream
@@ -24,7 +23,7 @@ def generate_tree_from_code(code):
 
 @cache
 def generate_tree_from_stream(stream):
-    logger.info(f"Generating tree")
+    logger.info("Generating tree")
     lexer = Python3Lexer(stream)
     stream = CommonTokenStream(lexer)
     py_parser = Python3Parser(stream)
@@ -69,35 +68,21 @@ def main(pattern, code, args=None):
         print(e)
         return
 
-    dot = gv.Digraph()
-    dot = ast_drawer(dot).visit(pattern_tree)
-    dot.render(f'graph_output/fsm_pattern', format="png", view=False)
-
     fsm = Python_Visitor().visit(pattern_tree)
 
     simu = Simulator(fsm, code_tree)
 
-    if args and not args.nogui:
-        simu.start()
-        root = tk.Tk()
-        app = SimulatorGUI(root, simu, code_tree)
-        root.mainloop()
-    else:
-        listener = ConsolePytternListener()
-        simu.add_listener(listener)
-        html = HTMLPytternListener(code, "output")
-        simu.add_listener(html)
-        simu.start()
-        while len(simu.states) > 0:
-            simu.step()
-        print(simu.match_set.matches)
-        html.generate_full_html()
+    listener = ConsolePytternListener()
+    simu.add_listener(listener)
+    simu.start()
+    while len(simu.states) > 0:
+        simu.step()
+    print(simu.match_set.matches)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--nogui", action="store_true")
     parser.add_argument("--web", action="store_true")
 
     parser.add_argument("pattern")

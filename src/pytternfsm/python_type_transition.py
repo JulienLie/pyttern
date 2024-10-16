@@ -21,8 +21,6 @@ def get_specific_child(ctx, clazz):
 
 
 class AssignTransition(transition):
-    def __init__(self):
-        super().__init__()
 
     def __call__(self, node, _):
         expr_node = get_specific_child(node, Python3Parser.Expr_stmtContext)
@@ -44,8 +42,6 @@ class AssignTransition(transition):
 
 
 class ForTransition(transition):
-    def __init__(self):
-        super().__init__()
 
     def __call__(self, node, _):
         for_node = get_specific_child(node, Python3Parser.For_stmtContext)
@@ -65,8 +61,6 @@ class ForTransition(transition):
 
 
 class WhileTransition(transition):
-    def __init__(self):
-        super().__init__()
 
     def __call__(self, node, _):
         while_node = get_specific_child(node, Python3Parser.While_stmtContext)

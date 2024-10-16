@@ -1,4 +1,4 @@
-class PytternListener(object):
+class PytternListener():
     def on_match(self, simulator):
         pass
 
