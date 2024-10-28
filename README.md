@@ -1,9 +1,24 @@
 # Pyttern
-Pyttern is a python library to create patterns file for Python code.
+Pyttern is a python library to create pattern files for Python code.
+
+## Installation
+To install the pyttern library, you can use pip:
+
+```bash
+pip install git+https://github.com/JulienLie/pyttern.git
+```
+
+You can also clone the repository and install it manually:
+- clone the repository
+- go to the pyttern directory
+- run the following command:
+```bash
+pip install -e .
+```
 
 ## Syntax
 
-We extended the python syntax to create patterns file. Our new syntax include the following elements:
+We extended the python syntax to create pattern files. Our new syntax includes the following elements:
 
 | Wildcard | Description                                                               |
 |----------|---------------------------------------------------------------------------|
@@ -46,7 +61,6 @@ If strict_match is set to False, a "soft" match is performed, which allows for f
 4. `match_details: boolean` (optional) If match_details is set to True, the function returns a tuple (result, details), 
 where result is a boolean value indicating whether the code matches the pattern. 
 If result is True, details contains the match details. If result is False, details contains the error that prevented the match.
-
 
 ## Examples
 ### Wildcard: ``?``
@@ -171,6 +185,7 @@ def foo(x):
 ### Combining Wildcards
 You can combine wildcards to create more complex patterns.
 
+TODO: Add more examples
 #### Pyttern
 ```python
 def ?(?*):
@@ -254,7 +269,7 @@ This option can be used in five different ways:
     2. `?{n, }`: Match at least `n` elements
     3. `?{, m}`: Match at most `m` elements
     4. `?{n}`: Match exactly `n` elements
-    5. `?{0}`: Create a `not` wildcard. For example: `?:{0}` will ensure that the current element does not have a body.
+[//]: # (5. `?{0}`: Create a `not` wildcard. For example: `?:{0}` will ensure that the current element does not have a body.)
 
 ### Wildcard Option: ``?[Type, ...]``
 The `?[Type, ...]` option allows you to specify the type of the element to match. For example, the pattern `?[For]` will match any integer value.
@@ -281,7 +296,7 @@ The `?{n, m}` option allows you to specify the number of elements to match. For 
 #### Pyttern
 ```python
 def foo():
-    ?:{3}
+    ?:{3} # I want to match exactly 3 level of indentation
         x = 0
     return x
 ```
@@ -297,6 +312,6 @@ def foo():
 ```
 
 
-## Augassign
+## Augassign WIP
 We implemented a match between `augassign` and `assign`. For example, the pattern `x = x + 1` will match `x += 1` and the 
 pattern `x += 1` will match `x = x + 1`.

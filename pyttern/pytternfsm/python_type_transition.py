@@ -1,7 +1,7 @@
 from loguru import logger
 
-from antlr import Python3Parser
-from simulator.transitions import transition
+from ..antlr import Python3Parser
+from ..simulator.transitions import Transition
 
 
 def get_specific_child(ctx, clazz):
@@ -20,7 +20,7 @@ def get_specific_child(ctx, clazz):
         return None
 
 
-class AssignTransition(transition):
+class AssignTransition(Transition):
 
     def __call__(self, node, _):
         expr_node = get_specific_child(node, Python3Parser.Expr_stmtContext)
@@ -38,10 +38,10 @@ class AssignTransition(transition):
         return isinstance(other, AssignTransition)
 
     def __hash__(self):
-        return super(object).__hash__()
+        return super().__hash__()
 
 
-class ForTransition(transition):
+class ForTransition(Transition):
 
     def __call__(self, node, _):
         for_node = get_specific_child(node, Python3Parser.For_stmtContext)
@@ -57,10 +57,10 @@ class ForTransition(transition):
         return isinstance(other, ForTransition)
 
     def __hash__(self):
-        return super(object).__hash__()
+        return super().__hash__()
 
 
-class WhileTransition(transition):
+class WhileTransition(Transition):
 
     def __call__(self, node, _):
         while_node = get_specific_child(node, Python3Parser.While_stmtContext)
@@ -76,4 +76,4 @@ class WhileTransition(transition):
         return isinstance(other, WhileTransition)
 
     def __hash__(self):
-        return super(object).__hash__()
+        return super().__hash__()

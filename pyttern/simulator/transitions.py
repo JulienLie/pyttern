@@ -1,10 +1,8 @@
-from abc import ABC
-
 from antlr4.tree.Tree import TerminalNodeImpl
 from loguru import logger
 
 
-class transition(ABC):
+class Transition:
     def __call__(self, node, variables):
         raise NotImplementedError
 
@@ -21,7 +19,7 @@ class transition(ABC):
         raise NotImplementedError
 
 
-class class_transition(transition):
+class ClassTransition(Transition):
     def __init__(self, clazz):
         self.clazz = clazz
 
@@ -35,7 +33,7 @@ class class_transition(transition):
         return self.clazz.__name__
 
     def __eq__(self, other):
-        if not isinstance(other, class_transition):
+        if not isinstance(other, ClassTransition):
             return False
         return self.clazz == other.clazz
 
@@ -43,12 +41,12 @@ class class_transition(transition):
         return hash(self.clazz)
 
 
-class object_transition(class_transition):
+class ObjectTransition(ClassTransition):  # pylint: disable=too-few-public-methods
     def __init__(self):
         super().__init__(object)
 
 
-class string_transition(transition):
+class StringTransition(Transition):
     def __init__(self, string):
         self.string = string
 
@@ -64,7 +62,7 @@ class string_transition(transition):
         return self.string
 
     def __eq__(self, other):
-        if not isinstance(other, string_transition):
+        if not isinstance(other, StringTransition):
             return False
         return self.string == other.string
 
@@ -72,7 +70,7 @@ class string_transition(transition):
         return hash(self.string)
 
 
-class except_transition(transition):
+class ExceptTransition(Transition):
     def __init__(self, node):
         self.node = node
 
@@ -91,7 +89,7 @@ class except_transition(transition):
         return f"All except {self.node}"
 
     def __eq__(self, other):
-        if not isinstance(other, except_transition):
+        if not isinstance(other, ExceptTransition):
             return False
         return self.node == other.node
 
@@ -99,7 +97,7 @@ class except_transition(transition):
         return hash(self.node)
 
 
-class var_transition(transition):
+class VarTransition(Transition):
     def __init__(self, node):
         self.node = node
         self.name = node.var if hasattr(node, "var") else node
@@ -120,9 +118,7 @@ class var_transition(transition):
     def __compare_asts(ast1, ast2):
         if ast1 == ast2:
             return True
-        if ast1 is None or ast2 is None:
-            return False
-        if not isinstance(ast1, ast2.__class__):
+        if ast1 is None or ast2 is None or not isinstance(ast1, ast2.__class__):
             return False
         if isinstance(ast1, TerminalNodeImpl):
             return ast1.getText() == ast2.getText()
@@ -131,7 +127,7 @@ class var_transition(transition):
         if ast1.getChildCount() != ast2.getChildCount():
             return False
         for i in range(ast1.getChildCount()):
-            if not var_transition.__compare_asts(ast1.getChild(i), ast2.getChild(i)):
+            if not VarTransition.__compare_asts(ast1.getChild(i), ast2.getChild(i)):
                 return False
         return True
 
@@ -142,7 +138,7 @@ class var_transition(transition):
         return f"Get {self.node}"
 
     def __eq__(self, other):
-        if not isinstance(other, var_transition):
+        if not isinstance(other, VarTransition):
             return False
         return self.node == other.node
 
@@ -150,24 +146,7 @@ class var_transition(transition):
         return hash(self.node)
 
 
-class test_transition(transition):
-    def __call__(self, node, variables):
-        return False
-
-    def __str__(self):
-        return "Test"
-
-    def __repr__(self):
-        return "Test"
-
-    def __eq__(self, other):
-        return self == other
-
-    def __hash__(self):
-        return hash(self)
-
-
-class or_transition(transition):
+class OrTransition(Transition):
     def __init__(self, transitions=None):
         if transitions is None:
             transitions = []
@@ -177,19 +156,19 @@ class or_transition(transition):
         self.transitions.append(transition)
 
     def __call__(self, node, variables):
-        for transi in self.transitions:
-            if not transi(node, variables):
+        for transition in self.transitions:
+            if not transition(node, variables):
                 return False
         return True
 
     def __str__(self):
-        return " or ".join([str(transi) for transi in self.transitions])
+        return " or ".join([str(transition) for transition in self.transitions])
 
     def __repr__(self):
-        return " or ".join([str(transi) for transi in self.transitions])
+        return " or ".join([str(transition) for transition in self.transitions])
 
     def __eq__(self, other):
-        if not isinstance(other, or_transition):
+        if not isinstance(other, OrTransition):
             return False
         return self.transitions == other.transitions
 

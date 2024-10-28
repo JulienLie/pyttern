@@ -1,12 +1,12 @@
 from antlr4 import TerminalNode
 from loguru import logger
 
-from antlr import Python3ParserVisitor, Python3Parser
-from pytternfsm import python_type_transition as ptt
-from pytternfsm.python_type_transition import get_specific_child
-from simulator.pyttern_fsm import FSM, Movement
-from simulator.transitions import class_transition, string_transition, object_transition, except_transition, \
-    var_transition, or_transition
+from ..antlr import Python3ParserVisitor, Python3Parser
+from ..pytternfsm import python_type_transition as ptt
+from ..pytternfsm.python_type_transition import get_specific_child
+from ..simulator.pyttern_fsm import FSM, Movement
+from ..simulator.transitions import ClassTransition, StringTransition, ObjectTransition, ExceptTransition, \
+    VarTransition, OrTransition
 
 
 def is_specific_statement(ctx, clazz):
@@ -26,7 +26,7 @@ class Python_Visitor(Python3ParserVisitor):
     def text_node(self, text):
         next_node = FSM()
         transition = self.get_up_transition(
-            next_node, string_transition(
+            next_node, StringTransition(
                 text))
         self.current_fsm_node.add_transition(*transition)
 
@@ -35,7 +35,7 @@ class Python_Visitor(Python3ParserVisitor):
 
     def get_up_transition(self, next_node, pred=None):
         if pred is None:
-            pred = object_transition()
+            pred = ObjectTransition()
 
         up_to = self.up_to.pop() if len(self.up_to) > 0 else None
         if up_to is not None:
@@ -45,11 +45,11 @@ class Python_Visitor(Python3ParserVisitor):
             self.current_fsm_node.add_transition(*null_transition)
             self.current_fsm_node = null_node
 
-            self_transition = (null_node, except_transition(node), [Movement.MP])
+            self_transition = (null_node, ExceptTransition(node), [Movement.MP])
             self.current_fsm_node.add_transition(*self_transition)
 
             up_node = FSM()
-            transition = (next_node, var_transition(node), [Movement.MP] * depth + [Movement.MRS])
+            transition = (next_node, VarTransition(node), [Movement.MP] * depth + [Movement.MRS])
 
             self.depth = 0
             return transition
@@ -82,7 +82,7 @@ class Python_Visitor(Python3ParserVisitor):
             start = (node.start.line - 1, node.start.column)
             end = (node.stop.line - 1, node.stop.column)
         next_node = FSM(start=start, end=end)
-        transition = (next_node, class_transition(clazz), [Movement.MLC])
+        transition = (next_node, ClassTransition(clazz), [Movement.MLC])
         self.current_fsm_node.add_transition(*transition)
 
         self.current_fsm_node = next_node
@@ -122,14 +122,14 @@ class Python_Visitor(Python3ParserVisitor):
         for child in ttype.getChildren(lambda x: isinstance(x, Python3Parser.NameContext)):
             clazz.append(f"{child.getText()}Transition")
         logger.debug(f"Wildcard types: {clazz}")
-        transition = or_transition()
+        transition = OrTransition()
         for c in clazz:
             tran = getattr(ptt, c)
             transition.add_transition(tran())
         return transition
 
     def visitSimple_wildcard(self, ctx: Python3Parser.Simple_wildcardContext):
-        pred = object_transition()
+        pred = ObjectTransition()
         pred = self.get_type_transition(ctx, pred)
 
         numbers = ctx.getChild(0, Python3Parser.Wildcard_numberContext)
@@ -172,7 +172,7 @@ class Python_Visitor(Python3ParserVisitor):
 
         if block_parent.children[-1] != stmt_parent:
             if self.strict:
-                pred = self.get_type_transition(ctx, object_transition())
+                pred = self.get_type_transition(ctx, ObjectTransition())
                 self_transition = (self.current_fsm_node, pred, [Movement.MRS])
                 self.current_fsm_node.add_transition(*self_transition)
             return self.current_fsm_node
@@ -200,22 +200,22 @@ class Python_Visitor(Python3ParserVisitor):
             return child.accept(self)
 
         if not self.strict:
-            self_transition = (self.current_fsm_node, object_transition(), [Movement.MRS])
+            self_transition = (self.current_fsm_node, ObjectTransition(), [Movement.MRS])
             self.current_fsm_node.add_transition(*self_transition)
 
         if is_specific_statement(ctx, Python3Parser.Compound_wildcardContext):
             save_node = FSM()
-            save_transition = (save_node, var_transition(ctx), [])
+            save_transition = (save_node, VarTransition(ctx), [])
             self.current_fsm_node.add_transition(*save_transition)
             self.current_fsm_node = save_node
             self.up_to.append((ctx, self.depth))
 
             res = self.visitChildren(ctx)
 
-            next_stmts = FSM.get_next_nodes(res, class_transition(Python3Parser.StmtContext))
+            next_stmts = FSM.get_next_nodes(res, ClassTransition(Python3Parser.StmtContext))
             next_stmt = next(next_stmts, None)
             if next_stmt is not None:
-                skip_transition = (next_stmt, object_transition(), [])
+                skip_transition = (next_stmt, ObjectTransition(), [])
                 res.add_transition(*skip_transition)
             return res
 
@@ -229,14 +229,14 @@ class Python_Visitor(Python3ParserVisitor):
     def visitVar_wildcard(self, ctx: Python3Parser.Var_wildcardContext):
         var_name = ctx.name().getText()
         next_node = FSM()
-        transition = self.get_up_transition(next_node, var_transition(var_name))
+        transition = self.get_up_transition(next_node, VarTransition(var_name))
         self.current_fsm_node.add_transition(*transition)
         self.current_fsm_node = next_node
         return next_node
 
     def visitSimple_compound_wildcard(self, ctx: Python3Parser.Simple_compound_wildcardContext):
         next_node = FSM()
-        pred = self.get_type_transition(ctx, object_transition())
+        pred = self.get_type_transition(ctx, ObjectTransition())
 
         numbers = ctx.getChild(0, Python3Parser.Wildcard_numberContext)
         if numbers is not None:
@@ -247,12 +247,12 @@ class Python_Visitor(Python3ParserVisitor):
                 transition = (child_node, pred, [Movement.MLC])
                 self.current_fsm_node.add_transition(*transition)
                 self.depth += 1
-                self_transition = (child_node, object_transition(), [Movement.MRS])
+                self_transition = (child_node, ObjectTransition(), [Movement.MRS])
                 child_node.add_transition(*self_transition)
                 self.current_fsm_node = child_node
 
                 down_node = FSM()
-                down_transition = (down_node, class_transition(Python3Parser.BlockContext), 3 * [Movement.MLC])
+                down_transition = (down_node, ClassTransition(Python3Parser.BlockContext), 3 * [Movement.MLC])
                 self.depth += 3
                 self.current_fsm_node.add_transition(*down_transition)
 
@@ -260,7 +260,7 @@ class Python_Visitor(Python3ParserVisitor):
 
         transition = (next_node, pred, [Movement.MLC])
         self.current_fsm_node.add_transition(*transition)
-        self_transition = (next_node, object_transition(), [Movement.MRS])
+        self_transition = (next_node, ObjectTransition(), [Movement.MRS])
         next_node.add_transition(*self_transition)
         #self.depth += 1
         self.current_fsm_node = next_node
@@ -271,13 +271,13 @@ class Python_Visitor(Python3ParserVisitor):
             high = int(numbers.NUMBER(1).getText()) if numbers.NUMBER(1) is not None else low
             for i in range(low, high):
                 child_node = FSM()
-                transition = (child_node, class_transition(Python3Parser.BlockContext), 4*[Movement.MLC])
+                transition = (child_node, ClassTransition(Python3Parser.BlockContext), 4 * [Movement.MLC])
                 next_node.add_transition(*transition)
 
-                self_transition = (child_node, object_transition(), [Movement.MRS])
+                self_transition = (child_node, ObjectTransition(), [Movement.MRS])
                 child_node.add_transition(*self_transition)
 
-                down_transition = (node, class_transition(Python3Parser.BlockContext), [Movement.MLC])
+                down_transition = (node, ClassTransition(Python3Parser.BlockContext), [Movement.MLC])
                 self.depth += 3
                 child_node.add_transition(*down_transition)
                 next_node = child_node
@@ -286,13 +286,13 @@ class Python_Visitor(Python3ParserVisitor):
 
     def visitMultiple_compound_wildcard(self, ctx: Python3Parser.Multiple_compound_wildcardContext):
         next_node = FSM()
-        transition = (next_node, object_transition(), [Movement.MLC])
+        transition = (next_node, ObjectTransition(), [Movement.MLC])
         self.current_fsm_node.add_transition(*transition)
 
-        self_transition = (next_node, object_transition(), [Movement.MRS])
+        self_transition = (next_node, ObjectTransition(), [Movement.MRS])
         next_node.add_transition(*self_transition)
 
-        back_transition = (self.current_fsm_node, object_transition(), [])
+        back_transition = (self.current_fsm_node, ObjectTransition(), [])
         next_node.add_transition(*back_transition)
 
         self.current_fsm_node = next_node
@@ -309,7 +309,7 @@ class Python_Visitor(Python3ParserVisitor):
         transition = self.get_up_transition(
             next_node)
         self.current_fsm_node.add_transition(*transition)
-        self_transition = (next_node, object_transition(), [Movement.MRS])
+        self_transition = (next_node, ObjectTransition(), [Movement.MRS])
         next_node.add_transition(*self_transition)
         self.current_fsm_node = next_node
 

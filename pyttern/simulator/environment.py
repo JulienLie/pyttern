@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from antlr4 import ParserRuleContext
 
-from simulator.pyttern_fsm import FSM
+from ..simulator.pyttern_fsm import FSM
 
 
 @dataclass

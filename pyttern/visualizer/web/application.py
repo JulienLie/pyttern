@@ -24,7 +24,7 @@ Session(app)
 """ Helper classes and methods """
 
 
-class PT_to_JSON(ParseTreeVisitor):
+class PtToJson(ParseTreeVisitor):
     def visitChildren(self, node):
         elem = {"name": node.__class__.__name__, "children": [], "id": hash(node)}
         if node.start is not None:
@@ -44,7 +44,12 @@ class PT_to_JSON(ParseTreeVisitor):
         return elem
 
     def visitTerminal(self, node):
-        return {"name": node.__class__.__name__, "symbol": node.symbol.text, "children": [], 'id': hash(node)}
+        return {
+            "name": node.__class__.__name__,
+            "symbol": node.symbol.text,
+            "children": [],
+            'id': hash(node)
+        }
 
     def visitErrorNode(self, node):
         return {"name": node.__class__.__name__, "children": [], id: hash(node)}
@@ -60,11 +65,15 @@ def file_check():
     def _file_check(f):
         @wraps(f)
         def __file_check(*args, **kwargs):
-            if "pyttern_code" in session and "python_code" in session and session["pyttern_code"] is not None and \
-                    session["python_code"] is not None:
+            if ("pyttern_code" in session and "python_code" in session
+                    and session["pyttern_code"] is not None
+                    and session["python_code"] is not None):
                 return f(*args, **kwargs)
-            else:
-                return json.dumps({"status": "error", "message": "Missing pyttern or python code"})
+
+            return json.dumps({
+                "status": "error",
+                "message": "Missing pyttern or python code"
+            })
 
         return __file_check
 
@@ -104,19 +113,24 @@ def fsm_to_json(fsm):
     return nodes
 
 
-class JSON_Listener(PytternListener):
+class JsonListener(PytternListener):
     def __init__(self):
         self.data = []
 
-    def step(self, simulator, fsm, ast, variables, matches):
+    def step(self, _, fsm, ast, variables, matches):
         state_info = (str(fsm), hash(ast))
         current_matchings = [(str(fsm), hash(ast)) for fsm, ast in matches]
         logger.debug(variables)
-        var_strs = [f"{var}: {PT_to_JSON().visit(variables[var])}" for var in variables]
+        var_strs = [f"{var}: {PtToJson().visit(variables[var])}" for var in variables]
         logger.debug(var_strs)
-        self.data.append({"state": state_info, "matches": current_matchings, "match": False, "variables": var_strs})
+        self.data.append({
+            "state": state_info,
+            "matches": current_matchings,
+            "match": False,
+            "variables": var_strs
+        })
 
-    def on_match(self, simulator):
+    def on_match(self, _):
         self.data[-1]["match"] = True
 
 
@@ -136,7 +150,7 @@ def index():
         try:
             pyttern_code = session["pyttern_code"]
             pyttern_tree = generate_tree_from_code(pyttern_code)
-            pyttern_tree_graph = PT_to_JSON().visit(pyttern_tree)
+            pyttern_tree_graph = PtToJson().visit(pyttern_tree)
             strict = session.get('strict', False)
             pyttern_fsm = Python_Visitor(strict=strict).visit(pyttern_tree)
             pyttern_fsm_graph = fsm_to_json(pyttern_fsm)
@@ -147,7 +161,7 @@ def index():
     if "python_code" in session and session["python_code"] is not None:
         python_code = session["python_code"]
         python_tree = generate_tree_from_code(python_code)
-        python_graph = PT_to_JSON().visit(python_tree)
+        python_graph = PtToJson().visit(python_tree)
 
     return render_template(
         'index.html', pyttern_code=pyttern_code, python_code=python_code, python_graph=python_graph,
@@ -196,7 +210,7 @@ def start():
     pyttern_code = session["pyttern_code"]
     python_code = session["python_code"]
     simulator = get_simulator(pyttern_code, python_code)
-    json_listener = JSON_Listener()
+    json_listener = JsonListener()
     simulator.add_listener(json_listener)
     simulator.start()
     first_state = simulator.states[-1]
@@ -208,8 +222,12 @@ def start():
     session["data"] = json_listener.data
     match_states = [i for i, data in enumerate(json_listener.data) if data["match"]]
     logger.debug(f"Matching states: {match_states}")
-    return json.dumps(
-        {"status": "ok", "n_steps": simulator.n_step - 1, "state": first_state_info, "match_states": match_states})
+    return json.dumps({
+        "status": "ok",
+        "n_steps": simulator.n_step - 1,
+        "state": first_state_info,
+        "match_states": match_states
+    })
 
 
 @app.route("/api/step", methods=['POST'])
@@ -229,7 +247,12 @@ def step():
     if current_data["match"]:
         flash("New match found", "message")
 
-    return json.dumps(
-        {"status": "ok", "state": state_info, "current_matchings": current_matchings,
-         "previous_matchings": previous_matchings, "messages": get_flashed_messages(), "match": current_data["match"],
-         "variables": current_data["variables"]})
+    return json.dumps({
+        "status": "ok",
+        "state": state_info,
+        "current_matchings": current_matchings,
+        "previous_matchings": previous_matchings,
+        "messages": get_flashed_messages(),
+        "match": current_data["match"],
+        "variables": current_data["variables"]
+    })

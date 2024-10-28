@@ -1,3 +1,6 @@
+from loguru import logger
+
+
 class PytternListener():
     def on_match(self, simulator):
         pass
@@ -22,9 +25,9 @@ class ConsolePytternListener(PytternListener):
     def on_transition(self, simulator, current_fsm, current_ast, next_node, next_ast, classes, movements, _):
         current_ast_str = f"{current_ast.__class__.__name__[:-7]}({current_ast.getText()})".replace("\n", "\\n")
         next_ast_str = f"{next_ast.__class__.__name__[:-7]}({next_ast.getText()})".replace("\n", "\\n")
-        print(
+        logger.info(
             f"Step {simulator.n_step}: Transition from node {current_fsm} to {next_node}, matching {current_ast_str} "
-            f"with {classes.__name__.replace('Context', '')}"
+            f"with {classes}"
             f"and {movements} to {next_ast_str}")
 
     def on_start(self, simulator, fsm, node):

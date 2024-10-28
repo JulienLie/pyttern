@@ -578,7 +578,7 @@ class _SelectorTransport(transports._FlowControlMixin,
         elif self._closing:
             info.append('closing')
         info.append('fd=%s' % self._sock_fd)
-        # test if the transport was closed
+        # tests if the transport was closed
         if self._loop is not None and not self._loop.is_closed():
             polling = _test_selector_event(self._loop._selector,
                                            self._sock_fd, selectors.EVENT_READ)

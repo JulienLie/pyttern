@@ -74,7 +74,7 @@ def run_until(loop, pred, timeout=30):
 def run_once(loop):
     """Legacy API to run once through the event loop.
 
-    This is the recommended pattern for test static.  It will poll the
+    This is the recommended pattern for tests static.  It will poll the
     selector once and run all callbacks scheduled in response to I/O
     events.
     """
@@ -107,14 +107,14 @@ class SilentWSGIServer(WSGIServer):
 class SSLWSGIServerMixin:
 
     def finish_request(self, request, client_address):
-        # The relative location of our test directory (which
+        # The relative location of our tests directory (which
         # contains the ssl key and certificate files) differs
         # between the stdlib and stand-alone asyncio.
         # Prefer our own if we can find it.
         here = os.path.join(os.path.dirname(__file__), '..', 'tests')
         if not os.path.isdir(here):
             here = os.path.join(os.path.dirname(os.__file__),
-                                'test', 'test_asyncio')
+                                'tests', 'test_asyncio')
         keyfile = os.path.join(here, 'ssl_key.pem')
         certfile = os.path.join(here, 'ssl_cert.pem')
         context = ssl.SSLContext()
@@ -141,7 +141,7 @@ def _run_test_server(*, address, use_ssl=False, server_cls, server_ssl_cls):
         start_response(status, headers)
         return [b'Test message']
 
-    # Run the test WSGI server in a separate thread in order not to
+    # Run the tests WSGI server in a separate thread in order not to
     # interfere with event handling in the main thread
     server_class = server_ssl_cls if use_ssl else server_cls
     httpd = server_class(address, SilentWSGIRequestHandler)
@@ -306,7 +306,7 @@ class TestLoop(base_events.BaseEventLoop):
         return self._time
 
     def advance_time(self, advance):
-        """Move test time forward."""
+        """Move tests time forward."""
         if advance:
             self._time += advance
 

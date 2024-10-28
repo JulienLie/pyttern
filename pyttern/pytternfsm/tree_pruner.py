@@ -1,6 +1,6 @@
 from antlr4 import TerminalNode, Token
 
-from antlr import Python3ParserVisitor, Python3Parser
+from ..antlr import Python3ParserVisitor, Python3Parser
 
 
 class TreePruner(Python3ParserVisitor):

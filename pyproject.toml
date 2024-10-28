@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "pyttern"
+version = "0.2.0"
+description = ""
+authors = ["julien <julien.lienard@uclouvain.be>"]
+readme = "README.md"
+packages = [{include = "pyttern"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+antlr4-python3-runtime="4.7.2"
+cachelib="^0.13.0"
+Flask="^3.0.3"
+Flask-Session="^0.8.0"
+loguru="^0.7.2"
+pymemcache="^4.0.0"
+tqdm="^4.66.5"
+
+[tool.poetry.group.test.dependencies]
+pytest="^8.2.2"
+pylint="^3.2.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

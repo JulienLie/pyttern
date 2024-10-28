@@ -5,13 +5,13 @@ from functools import cache
 from antlr4 import FileStream, CommonTokenStream, InputStream
 from loguru import logger
 
-from PytternListener import ConsolePytternListener
-from antlr import Python3Parser
-from antlr.Python3Lexer import Python3Lexer
-from pyttern_error_listener import Python3ErrorListener
-from pytternfsm.python_visitor import Python_Visitor
-from pytternfsm.tree_pruner import TreePruner
-from simulator.simulator import Simulator
+from .PytternListener import ConsolePytternListener
+from .antlr import Python3Parser
+from .antlr.Python3Lexer import Python3Lexer
+from .pyttern_error_listener import Python3ErrorListener
+from .pytternfsm.python_visitor import Python_Visitor
+from .pytternfsm.tree_pruner import TreePruner
+from .simulator.simulator import Simulator
 
 
 @cache
@@ -75,6 +75,7 @@ def main(pattern, code, args=None):
     listener = ConsolePytternListener()
     simu.add_listener(listener)
     simu.start()
+
     while len(simu.states) > 0:
         simu.step()
     print(simu.match_set.matches)

@@ -3,9 +3,9 @@ import json
 from antlr4 import TerminalNode
 from loguru import logger
 
-from pytternfsm.match_set import MatchSet
-from simulator.pyttern_fsm import Movement
 from .environment import Environment
+from ..pytternfsm.match_set import MatchSet
+from ..simulator.pyttern_fsm import Movement
 
 
 class Simulator:
@@ -41,7 +41,7 @@ class Simulator:
         logger.debug(f"Step {self.n_step}")
         self.n_step += 1
         if len(self.states) == 0:
-            raise Exception("No more states to process")
+            raise Warning("No more states to process")
         current_state = self.states.pop()
         current_fsm, current_ast, variables, matches = current_state
         for listener in self._listeners:
@@ -106,7 +106,7 @@ class Simulator:
     def is_matching(self, state):
         fsm, ast, _, match = state
         if isinstance(ast, TerminalNode) and str(ast) == "<EOF>" and len(list(fsm.get_out_transitions())) == 0:
-            logger.info(f"Match found")
+            logger.info("Match found")
             self.match_set.record(match)
             for listener in self._listeners:
                 listener.on_match(self)
