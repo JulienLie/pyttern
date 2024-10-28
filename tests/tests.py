@@ -5,9 +5,9 @@ import os
 import pytest
 from tqdm import tqdm
 
-from main import generate_tree_from_file
-from pytternfsm.python_visitor import Python_Visitor
-from simulator.simulator import Simulator
+from pyttern.main import generate_tree_from_file
+from pyttern.pytternfsm.python_visitor import Python_Visitor
+from pyttern.simulator.simulator import Simulator
 from . import tests_files
 
 
